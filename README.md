@@ -37,7 +37,7 @@ Ensure that you have the `config.txt` file in the same directory as the script.
 
 ## Requirements
 
-- Python 2.x
+- Python 2.x or 3.x
 - Resilient SimpleClient library
 - A `config.txt` file with the necessary configurations
 
