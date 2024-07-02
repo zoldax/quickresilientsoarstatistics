@@ -1,4 +1,4 @@
-#!/usr/bin/env /usr/bin/python3.9
+#!/usr/bin/env python3.9
 # -*- coding: utf-8 -*-
 
 """
@@ -97,20 +97,21 @@ def count_notes(res_client, incident_id):
             task_id = task.get("id")
             comments_task = res_client.get("/tasks/{}/comments".format(task_id))
             note_count += len(comments_task)
-        
+
         return note_count
     except Exception as e:
         logging.error("Error counting notes for incident %s: %s", incident_id, e)
         return 0
 
 def count_attachments(res_client, incident_id):
-    """Count the number of attachments in an incident."""
+    """Count the number and total size of attachments in an incident."""
     try:
         attachments = res_client.get("/incidents/{}/attachments".format(incident_id))
-        return len(attachments)
+        total_size = sum(attachment["size"] for attachment in attachments)
+        return len(attachments), total_size
     except Exception as e:
         logging.error("Error counting attachments for incident %s: %s", incident_id, e)
-        return 0
+        return 0, 0
 
 def print_progress(current, total):
     """Print a progress bar."""
@@ -131,6 +132,7 @@ def main():
         artifact_count = 0
         note_count = 0
         attachment_count = 0
+        total_attachment_size = 0
 
         total_incidents = len(response.get("data", []))
         start_time = time.time()
@@ -147,7 +149,9 @@ def main():
 
             artifact_count += count_artifacts(res_client, incident_id)
             note_count += count_notes(res_client, incident_id)
-            attachment_count += count_attachments(res_client, incident_id)
+            attachments, size = count_attachments(res_client, incident_id)
+            attachment_count += attachments
+            total_attachment_size += size
 
             print_progress(i + 1, total_incidents)
 
@@ -162,6 +166,7 @@ def main():
         print('Total number of artifacts: {}'.format(artifact_count))
         print('Total number of notes: {}'.format(note_count))
         print('Total number of attachments: {}'.format(attachment_count))
+        print('Total size of attachments: {:.2f} MB'.format(total_attachment_size / (1024 * 1024)))
         print('Elapsed time: {}h {}m {}s'.format(int(hours), int(minutes), int(seconds)))
 
     except Exception as e:
