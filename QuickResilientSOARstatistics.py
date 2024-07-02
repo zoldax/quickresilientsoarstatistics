@@ -3,10 +3,10 @@
 
 """
 File : QuickResilientSOARstatistics.py
-Copyright (c) 2023 Abakus Sécurité
+Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
-Author : Abakus Sécurité
-Version : 1.0
+Author : Abakus Sécurité / Pascal Weber
+Version : 1.0.1
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents.
 The script includes a progress bar to follow the % of the completion of the export.
 
