@@ -1,0 +1,5 @@
+org_name=ABAKUS
+org_id=501
+base_url=https://192.168.10.47
+api_key_id=944c829b-7a98-401e-8748-38905a6a499c
+api_key_secret=Cexy61YBDSI5LAfphDXmOQ3ZtTP-z1yCYAo-XBMPjBY
