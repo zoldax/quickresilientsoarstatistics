@@ -21,7 +21,7 @@ This script retrieves artifact, note, attachment, and incident data from a Resil
 - **Copyright**: 2024 Abakus Sécurité
 - **Version Tested**: V43 of IBM SOAR (directly on a dev platform)
 - **Author**: Abakus Sécurité
-- **Version**: 1.0.1
+- **Version**: 1.0.3
 
 ## Description
 
@@ -57,6 +57,9 @@ Ensure that you have the `config.txt` file in the same directory as the script.
 - **Console Output**: 
   - Displays the total count of incidents, artifacts, notes, and attachments.
   - Displays the progress bar showing the percentage completion of the export.
+
+- **Results Output**: 
+  - Output console stats on file results.txt.
 
 ## Configuration
 
