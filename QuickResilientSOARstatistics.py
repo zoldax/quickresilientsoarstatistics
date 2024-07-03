@@ -7,8 +7,7 @@ Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
 Author : Abakus Sécurité / Pascal Weber
 Version : 1.0.1
-Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents.
-The script includes a progress bar to follow the % of the completion of the export.
+Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
 Input : config.txt
 The script requires a configuration file with the following parameters:
@@ -20,7 +19,7 @@ The script requires a configuration file with the following parameters:
 Output : QuickResilientSOARstatistics.log
 Error handling, by default DEBUG
 
-Output : Console output with the count of incidents, artifacts, notes, and attachments
+Output : Console and results.txt file with the count of incidents, artifacts, notes, and attachments including the total size of attachments.
 """
 
 import codecs
@@ -114,7 +113,7 @@ def count_attachments(res_client, incident_id):
         return 0, 0
 
 def print_progress(current, total):
-    """Print a progress bar."""
+    """Print a progress bar to the console."""
     progress = current / float(total)
     percent = int(progress * 100)
     bars = '#' * int(progress * 20)
@@ -123,16 +122,19 @@ def print_progress(current, total):
     sys.stdout.flush()
 
 def print_and_write(output_file, message):
-    """Print message to console and write to a file."""
+    """Print a message to the console and write it to a file."""
     print(message)
     output_file.write(message + '\n')
 
 def main():
+    """Main function to retrieve and print Resilient SOAR statistics."""
     try:
+        # Load configuration and connect to Resilient platform
         config = load_config()
         res_client = connect_to_resilient(config)
         response = fetch_incidents(res_client)
 
+        # Initialize counts
         incident_count = 0
         artifact_count = 0
         note_count = 0
@@ -150,6 +152,7 @@ def main():
             header += '--------------------------------------'
             print_and_write(output_file, header)
 
+            # Process each incident
             for i, incident in enumerate(response.get("data", [])):
                 incident_count += 1
                 incident_id = incident.get("id")
@@ -169,6 +172,7 @@ def main():
             minutes, seconds = divmod(elapsed_time, 60)
             hours, minutes = divmod(minutes, 60)
 
+            # Print results
             results = '\nTotal number of incidents: {}\n'.format(incident_count)
             results += 'Total number of artifacts: {}\n'.format(artifact_count)
             results += 'Total number of notes: {}\n'.format(note_count)
