@@ -122,6 +122,11 @@ def print_progress(current, total):
     sys.stdout.write('\r[{0}] {1}%'.format(bars + spaces, percent))
     sys.stdout.flush()
 
+def print_and_write(output_file, message):
+    """Print message to console and write to a file."""
+    print(message)
+    output_file.write(message + '\n')
+
 def main():
     try:
         config = load_config()
@@ -137,37 +142,41 @@ def main():
         total_incidents = len(response.get("data", []))
         start_time = time.time()
 
-        # Print header
-        current_date = datetime.datetime.now().strftime("%d/%m/%Y")
-        print('Quick SOAR Statistics by Abakus Sécurité')
-        print('Date: {}'.format(current_date))
-        print('--------------------------------------')
+        with open('results.txt', 'w', encoding='utf-8') as output_file:
+            # Print header
+            current_date = datetime.datetime.now().strftime("%d/%m/%Y")
+            header = 'Quick SOAR Statistics by Abakus Sécurité\n'
+            header += 'Date: {}\n'.format(current_date)
+            header += '--------------------------------------'
+            print_and_write(output_file, header)
 
-        for i, incident in enumerate(response.get("data", [])):
-            incident_count += 1
-            incident_id = incident.get("id")
+            for i, incident in enumerate(response.get("data", [])):
+                incident_count += 1
+                incident_id = incident.get("id")
 
-            artifact_count += count_artifacts(res_client, incident_id)
-            note_count += count_notes(res_client, incident_id)
-            attachments, size = count_attachments(res_client, incident_id)
-            attachment_count += attachments
-            total_attachment_size += size
+                artifact_count += count_artifacts(res_client, incident_id)
+                note_count += count_notes(res_client, incident_id)
+                attachments, size = count_attachments(res_client, incident_id)
+                attachment_count += attachments
+                total_attachment_size += size
 
-            print_progress(i + 1, total_incidents)
+                print_progress(i + 1, total_incidents)
 
-        end_time = time.time()
-        elapsed_time = end_time - start_time
+            end_time = time.time()
+            elapsed_time = end_time - start_time
 
-        # Convert elapsed time to a human-readable format
-        minutes, seconds = divmod(elapsed_time, 60)
-        hours, minutes = divmod(minutes, 60)
+            # Convert elapsed time to a human-readable format
+            minutes, seconds = divmod(elapsed_time, 60)
+            hours, minutes = divmod(minutes, 60)
 
-        print('\nTotal number of incidents: {}'.format(incident_count))
-        print('Total number of artifacts: {}'.format(artifact_count))
-        print('Total number of notes: {}'.format(note_count))
-        print('Total number of attachments: {}'.format(attachment_count))
-        print('Total size of attachments: {:.2f} MB'.format(total_attachment_size / (1024 * 1024)))
-        print('Elapsed time: {}h {}m {}s'.format(int(hours), int(minutes), int(seconds)))
+            results = '\nTotal number of incidents: {}\n'.format(incident_count)
+            results += 'Total number of artifacts: {}\n'.format(artifact_count)
+            results += 'Total number of notes: {}\n'.format(note_count)
+            results += 'Total number of attachments: {}\n'.format(attachment_count)
+            results += 'Total size of attachments: {:.2f} MB\n'.format(total_attachment_size / (1024 * 1024))
+            results += 'Elapsed time: {}h {}m {}s'.format(int(hours), int(minutes), int(seconds))
+
+            print_and_write(output_file, results)
 
     except Exception as e:
         logging.error("An unexpected error occurred: %s", e)
