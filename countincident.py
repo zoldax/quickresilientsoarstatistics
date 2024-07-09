@@ -64,7 +64,8 @@ def fetch_incidents(res_client):
                 }
             ]
         }
-        response = res_client.post("/incidents/query_paged?return_level=full", payload=payload)
+        #response = res_client.post("/incidents/query_paged?return_level=full", payload=payload)
+        response = res_client.post("/incidents/query_paged?ield_handle=-1", payload=payload)
         return response.get("data", [])
     except Exception as e:
         logging.error("Error fetching incidents: %s", e)
