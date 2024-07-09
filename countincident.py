@@ -55,21 +55,31 @@ def connect_to_resilient(config):
         sys.exit("Error connecting to Resilient platform: {}".format(e))
 
 def fetch_incidents(res_client):
-    """Fetch incidents from the Resilient platform."""
-    try:
-        payload = {
-            "filters": [
-                {
-                    "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
-                }
-            ]
-        }
-        #response = res_client.post("/incidents/query_paged?return_level=full", payload=payload)
-        response = res_client.post("/incidents/query_paged?field_handle=-1", payload=payload)
-        return response.get("data", [])
-    except Exception as e:
-        logging.error("Error fetching incidents: %s", e)
-        sys.exit("Error fetching incidents: {}".format(e))
+    """Fetch all incidents from the Resilient platform handling pagination."""
+    incidents = []
+    start = 0
+    page_size = 1000  # Adjust page size if necessary
+    while True:
+        try:
+            payload = {
+                "filters": [
+                    {
+                        "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
+                    }
+                ],
+                "start": start,
+                "length": page_size
+            }
+            response = res_client.post("/incidents/query_paged?return_level=full", payload=payload)
+            data = response.get("data", [])
+            incidents.extend(data)
+            if len(data) < page_size:
+                break
+            start += page_size
+        except Exception as e:
+            logging.error("Error fetching incidents: %s", e)
+            sys.exit("Error fetching incidents: {}".format(e))
+    return incidents
 
 def main():
     """Main function to retrieve and print the count of incidents."""
