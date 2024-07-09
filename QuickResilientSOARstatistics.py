@@ -6,7 +6,7 @@ File : QuickResilientSOARstatistics.py
 Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
 Author : Abakus Sécurité / Pascal Weber
-Version : 1.0.3
+Version : 1.0.4
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
 Input : config.txt
@@ -60,20 +60,32 @@ def connect_to_resilient(config):
         logging.error("Error connecting to Resilient platform: %s", e)
         sys.exit("Error connecting to Resilient platform: {}".format(e))
 
-def fetch_incidents(res_client):
-    """Fetch incidents from the Resilient platform."""
-    try:
-        payload = {
-            "filters": [
-                {
-                    "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
-                }
-            ]
-        }
-        return res_client.post("/incidents/query_paged?return_level=full", payload=payload)
-    except Exception as e:
-        logging.error("Error fetching incidents: %s", e)
-        sys.exit("Error fetching incidents: {}".format(e))
+def fetch_all_incidents(res_client):
+    """Fetch all incidents from the Resilient platform handling pagination."""
+    incidents = []
+    start = 0
+    page_size = 1000  # Adjust page size if necessary
+    while True:
+        try:
+            payload = {
+                "filters": [
+                    {
+                        "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
+                    }
+                ],
+                "start": start,
+                "length": page_size
+            }
+            response = res_client.post("/incidents/query_paged?return_level=full", payload=payload)
+            data = response.get("data", [])
+            incidents.extend(data)
+            if len(data) < page_size:
+                break
+            start += page_size
+        except Exception as e:
+            logging.error("Error fetching incidents: %s", e)
+            sys.exit("Error fetching incidents: {}".format(e))
+    return incidents
 
 def count_artifacts(res_client, incident_id):
     """Count the number of artifacts in an incident."""
@@ -132,7 +144,7 @@ def main():
         # Load configuration and connect to Resilient platform
         config = load_config()
         res_client = connect_to_resilient(config)
-        response = fetch_incidents(res_client)
+        incidents = fetch_all_incidents(res_client)
 
         # Initialize counts
         incident_count = 0
@@ -141,7 +153,7 @@ def main():
         attachment_count = 0
         total_attachment_size = 0
 
-        total_incidents = len(response.get("data", []))
+        total_incidents = len(incidents)
         start_time = time.time()
 
         with open('results.txt', 'w', encoding='utf-8') as output_file:
@@ -153,7 +165,7 @@ def main():
             print_and_write(output_file, header)
 
             # Process each incident
-            for i, incident in enumerate(response.get("data", [])):
+            for i, incident in enumerate(incidents):
                 incident_count += 1
                 incident_id = incident.get("id")
 
