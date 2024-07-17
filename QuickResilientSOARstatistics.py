@@ -6,7 +6,7 @@ File : QuickResilientSOARstatistics.py
 Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
 Author : Abakus Sécurité / Pascal Weber
-
+Version : 1.0.5
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
 Input : config.txt
@@ -43,6 +43,14 @@ logging.basicConfig(filename='QuickResilientSOARstatistics.log', level=logging.D
 logging.info('Starting script at %s', now)
 
 lock = Lock()
+
+# Dictionary to map status codes to their meanings
+STATUS_MEANINGS = {
+    "A": "Active",
+    "C": "Closed",
+    "D": "Deleted",
+    "P": "Pending"
+}
 
 def load_config(filename='config.txt'):
     """Load configuration from file."""
@@ -233,7 +241,8 @@ def main():
             results_message = '\nTotal number of incidents: {}\n'.format(results['incident_count'])
             results_message += 'Total number of closed incidents: {}\n'.format(results['closed_incident_count'])
             for status, count in results['status_counts'].items():
-                results_message += 'Total number of incidents with status {}: {}\n'.format(status, count)
+                status_meaning = STATUS_MEANINGS.get(status, 'Unknown')
+                results_message += 'Total number of incidents with status {}: {} ({})\n'.format(status, count, status_meaning)
             results_message += 'Total number of artifacts: {}\n'.format(results['artifact_count'])
             results_message += 'Total number of notes: {}\n'.format(results['note_count'])
             results_message += 'Total number of attachments: {}\n'.format(results['attachment_count'])
