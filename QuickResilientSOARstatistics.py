@@ -1,6 +1,5 @@
-#!/usr/bin/env python3.9
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 
 """
 File : QuickResilientSOARstatistics.py
@@ -10,7 +9,7 @@ Author : Abakus Sécurité / Pascal Weber
 Version : 1.0.4
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
-For use with python 2.7 change header :
+Change header for Python 2.7 on resilient platform
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -138,6 +137,7 @@ def process_incident(res_client, incident, results):
     """Process an incident and update results."""
     incident_id = incident.get("id")
     plan_status = incident.get("plan_status")
+    inc_training = incident.get("inc_training", False)
 
     artifact_count = count_artifacts(res_client, incident_id)
     note_count = count_notes(res_client, incident_id)
@@ -150,6 +150,8 @@ def process_incident(res_client, incident, results):
         results['attachment_count'] += attachment_count
         results['total_attachment_size'] += total_size
         results['status_counts'][plan_status] = results['status_counts'].get(plan_status, 0) + 1
+        if inc_training:
+            results['training_incidents'] += 1
 
 def worker(res_client, incidents_queue, results, total_incidents):
     """Worker thread to process incidents."""
@@ -195,7 +197,8 @@ def main():
             'note_count': 0,
             'attachment_count': 0,
             'total_attachment_size': 0,
-            'status_counts': {}
+            'status_counts': {},
+            'training_incidents': 0
         }
 
         total_incidents = len(incidents)
@@ -249,6 +252,7 @@ def main():
             results_message += u'Total number of notes: {}\n'.format(results['note_count'])
             results_message += u'Total number of attachments: {}\n'.format(results['attachment_count'])
             results_message += u'Total size of attachments: {:.2f} MB\n'.format(results['total_attachment_size'] / (1024 * 1024))
+            results_message += u'Total training incidents: {}\n'.format(results['training_incidents'])
             for status, count in results['status_counts'].items():
                 meaning = status_meanings.get(status, 'Unknown')
                 results_message += u'Total incidents with status {}: {} ({})\n'.format(status, count, meaning)
@@ -262,3 +266,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
