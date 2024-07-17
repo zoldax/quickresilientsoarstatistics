@@ -6,7 +6,7 @@ File : QuickResilientSOARstatistics.py
 Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
 Author : Abakus Sécurité / Pascal Weber
-Version : 1.0.4
+
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
 Input : config.txt
@@ -69,11 +69,6 @@ def fetch_all_incidents(res_client):
     while True:
         try:
             payload = {
-                "filters": [
-                    {
-                        "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
-                    }
-                ],
                 "start": start,
                 "length": page_size
             }
@@ -153,6 +148,7 @@ def main():
         note_count = 0
         attachment_count = 0
         total_attachment_size = 0
+        status_counts = {"A": 0, "C": 0, "D": 0, "P": 0}
 
         total_incidents = len(incidents)
         start_time = time.time()
@@ -169,6 +165,9 @@ def main():
             for i, incident in enumerate(incidents):
                 incident_count += 1
                 incident_id = incident.get("id")
+                status = incident.get("plan_status")
+                if status in status_counts:
+                    status_counts[status] += 1
 
                 artifact_count += count_artifacts(res_client, incident_id)
                 note_count += count_notes(res_client, incident_id)
@@ -191,6 +190,11 @@ def main():
             results += u'Total number of notes: {}\n'.format(note_count)
             results += u'Total number of attachments: {}\n'.format(attachment_count)
             results += u'Total size of attachments: {:.2f} MB\n'.format(total_attachment_size / (1024 * 1024))
+            results += u'Status counts:\n'
+            results += u'  A (Active): {}\n'.format(status_counts["A"])
+            results += u'  C (Closed): {}\n'.format(status_counts["C"])
+            results += u'  D (Deleted): {}\n'.format(status_counts["D"])
+            results += u'  P (Pending): {}\n'.format(status_counts["P"])
             results += u'Elapsed time: {}h {}m {}s'.format(int(hours), int(minutes), int(seconds))
 
             print_and_write(output_file, results)
