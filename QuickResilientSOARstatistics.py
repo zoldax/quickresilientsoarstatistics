@@ -6,7 +6,7 @@ File : QuickResilientSOARstatistics.py
 Copyright (c) 2024 Abakus Sécurité
 Version tested : V43 of IBM SOAR (directly on a dev platform)
 Author : Abakus Sécurité / Pascal Weber
-Version : 1.0.4
+
 Description : This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The results are printed to the console and saved to a file named results.txt. The script includes a progress bar to track the completion of the export.
 
 Input : config.txt
@@ -74,11 +74,6 @@ def fetch_all_incidents(res_client):
     while True:
         try:
             payload = {
-                "filters": [
-                    {
-                        "conditions": [{"field_name": "plan_status", "method": "equals", "value": "A"}]
-                    }
-                ],
                 "start": start,
                 "length": page_size
             }
@@ -136,6 +131,7 @@ def process_incident(res_client, incident, results, progress_queue):
     artifact_count = count_artifacts(res_client, incident_id)
     note_count = count_notes(res_client, incident_id)
     attachment_count, total_size = count_attachments(res_client, incident_id)
+    status = incident.get("plan_status", "Unknown")
 
     with lock:
         results['incident_count'] += 1
@@ -143,6 +139,9 @@ def process_incident(res_client, incident, results, progress_queue):
         results['note_count'] += note_count
         results['attachment_count'] += attachment_count
         results['total_attachment_size'] += total_size
+        results['status_counts'][status] = results['status_counts'].get(status, 0) + 1
+        if status == 'C':
+            results['closed_incident_count'] += 1
         progress_queue.put(1)
 
 def worker(res_client, incidents, results, progress_queue):
@@ -184,10 +183,12 @@ def main():
         # Initialize counts
         results = {
             'incident_count': 0,
+            'closed_incident_count': 0,
             'artifact_count': 0,
             'note_count': 0,
             'attachment_count': 0,
-            'total_attachment_size': 0
+            'total_attachment_size': 0,
+            'status_counts': {}
         }
 
         total_incidents = len(incidents)
@@ -230,6 +231,9 @@ def main():
 
             # Print results
             results_message = '\nTotal number of incidents: {}\n'.format(results['incident_count'])
+            results_message += 'Total number of closed incidents: {}\n'.format(results['closed_incident_count'])
+            for status, count in results['status_counts'].items():
+                results_message += 'Total number of incidents with status {}: {}\n'.format(status, count)
             results_message += 'Total number of artifacts: {}\n'.format(results['artifact_count'])
             results_message += 'Total number of notes: {}\n'.format(results['note_count'])
             results_message += 'Total number of attachments: {}\n'.format(results['attachment_count'])
