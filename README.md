@@ -22,7 +22,7 @@ This script retrieves artifact, note, attachment, and incident data from a Resil
 - **File**: QuickResilientSOARstatistics.py
 - **Version Tested**: V43 of IBM SOAR (directly on a dev platform)
 - **Author**: Abakus Sécurité
-- **Version**: 1.0.3
+- **Version**: 1.2.0
 
 ## Description
 
