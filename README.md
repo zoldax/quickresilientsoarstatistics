@@ -2,6 +2,8 @@
 
 This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The script includes a progress bar to follow the % of the completion of the export.
 
+[![License](https://img.shields.io/github/license/zoldax/quickresilientsoarstatistics?color=44CC11)](LICENSE)  [![Commit](https://img.shields.io/github/commit-activity/t/zoldax/quickresilientsoarstatistics)](https://github.com/zoldax/quickresilientsoarstatistics/commits/)  [![Views](https://hits.sh/github.com/zoldax/quickresilientsoarstatistics.svg)](https://hits.sh/github.com/zoldax/quickresilientsoarstatistics/) [![Last commit](https://img.shields.io/github/last-commit/zoldax/quickresilientsoarstatistics/main)](https://github.com/zoldax/quickresilientsoarstatistics/commits/main)
+
 ## Table of Contents
 
 1. [Details](#details)
