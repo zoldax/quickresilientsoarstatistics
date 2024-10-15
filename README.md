@@ -1,4 +1,4 @@
-# QuickResilientSOARstatistics
+# 🛠️ QuickResilientSOARstatistics
 
 This script retrieves artifact, note, attachment, and incident data from a Resilient SOAR platform and prints the count of artifacts, notes, attachments, and incidents. The script includes a progress bar to follow the % of the completion of the export.
 
@@ -96,3 +96,5 @@ Place this `config.txt` file in the same directory as the script.
 
 This script is provided "as is" without any warranty of any kind. Abakus Sécurité is not responsible for any damage or data loss that may occur from using this script. Use it at your own risk.
 
+## License
+Licensed under the Apache License, Version 2.0. See [LICENSE](http://www.apache.org/licenses/LICENSE-2.0) for more details.
